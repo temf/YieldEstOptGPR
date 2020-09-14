@@ -12,7 +12,7 @@ Class for Yield Estimation (and in future: Optimization)
 from __future__ import print_function
 from Est_GPR import Estimation_GPR
 import numpy as np
-import time
+from numpy import genfromtxt
 import scipy.stats
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
 np.seterr(divide = 'ignore') 
@@ -20,8 +20,9 @@ np.seterr(divide = 'ignore')
 
 class YieldEstOpt_GPR():
     
-    def __init__(self, model, input_freq, threshold, N_mc, input_distr, YE_method, Sorting_Strategy, Batch_Size, Safety_Factor, number_uq_para):
+    def __init__(self, problem, model, input_freq, threshold, N_mc, input_distr, YE_method, Sorting_Strategy, Batch_Size, Safety_Factor, number_uq_para):
         # instance of numerical model, e.g. Scattering Ana
+        self.problem = problem
         self.model = model
         self.freqrange = np.arange(input_freq[0],input_freq[1]+0.01,input_freq[2])
         self.threshold=threshold
@@ -36,19 +37,31 @@ class YieldEstOpt_GPR():
 
 
     def sample_generator(self, mean, distr, sample_size, normal = 'true'):
-        samples = []
-        if normal: # truncated normal according to pdf (for MC sample points and initial training data)
-            for k in range(len(distr)):
-                mu = mean[k]; sigma = distr[k][1]; lb = mu+distr[k][2]; ub = mu+distr[k][3];
-                if lb < 0: lb = 0
-                samples_k = scipy.stats.truncnorm.rvs((lb - mu)/sigma, (ub-mu)/sigma, loc = mu, scale = sigma, size = sample_size)
-                samples.append(samples_k)
-        else: # uniform within bounds (alternative option for initial training data)
-            for k in range(len(distr)):
-                mu = mean[k]; lb = mu+distr[k][2]; ub = mu+distr[k][3];
-                samples_k = scipy.stats.uniform.rvs(lb,ub-lb,sample_size)
-                samples.append(samples_k)        
-        samples = np.array(samples)
+        # Generate sample set for the waveguide problem acc. to specific distribution
+        if self.problem == 'Waveguide':
+            samples = []
+            if normal: # truncated normal according to pdf (for MC sample points and initial training data)
+                for k in range(len(distr)):
+                    mu = mean[k]; sigma = distr[k][1]; lb = mu+distr[k][2]; ub = mu+distr[k][3];
+                    if lb < 0: lb = 0
+                    samples_k = scipy.stats.truncnorm.rvs((lb - mu)/sigma, (ub-mu)/sigma, loc = mu, scale = sigma, size = sample_size)
+                    samples.append(samples_k)
+            else: # uniform within bounds (alternative option for initial training data)
+                for k in range(len(distr)):
+                    mu = mean[k]; lb = mu+distr[k][2]; ub = mu+distr[k][3];
+                    samples_k = scipy.stats.uniform.rvs(lb,ub-lb,sample_size)
+                    samples.append(samples_k)        
+            samples = np.array(samples)
+        
+        # Call sample set for the lowpass filter problem from prepared list
+        elif self.problem == 'Lowpass':
+            samples = genfromtxt('Lowpass_data_sample.csv', delimiter=',',skip_header=True)
+            samples = samples[0:sample_size,:].T
+            
+            # load QoI results from list
+            QoI_all = genfromtxt('Lowpass_data_QoI.csv', delimiter=',',skip_header=True)
+            self.QoI = QoI_all[0:sample_size*len(self.freqrange)]
+        
         return samples
 
   
