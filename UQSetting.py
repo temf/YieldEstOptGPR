@@ -5,13 +5,12 @@ Created on Mon Sep 30 12:56:13 2019
 @author: Mona
 
 
-Util Functions for Validation of sample points for the dielectrical waveguide
+Util Functions for Validation of sample points
 """
 
 
 import numpy as np
 
-    
 
 def prove_pfs(self,QoI,unit='compl',freqv=[]):
     # validate if performance feature specifications are fulfilled: yes=1, no=0
@@ -131,15 +130,13 @@ def paraUQ4_WG(freq, uq_input):
         return params
 
 
-# 4 uncertain parameters for lowpass filter
+# 6 uncertain parameters for lowpass filter
 def paraUQ6_LP(uq_input, i):
     params = [i,uq_input]
     
     return params
 
 
-    
-    
 # Transformation of uncertain parameters for S-parameter calculation
 def paraUQ(self, freq, uq_input, i):#,cst_list=0):
     if self.problem == 'Waveguide':
@@ -161,17 +158,6 @@ def paraUQ(self, freq, uq_input, i):#,cst_list=0):
     
     
     
-    
-    
-    
-    
-    
-#    val = self.model(paraUQ(freq,sample_i,self.number_uq_para))
-    
-#    fSreal, fSimag = self.model(self,[i,samples_uq[i]],self.freqrange,dB=False)        
-    
-    
-#    val_real, val_imag = self.model(self,paraUQ(self,freq,sample_uq[i],i),dB=False)
     
     
     
