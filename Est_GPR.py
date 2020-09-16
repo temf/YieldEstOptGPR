@@ -106,11 +106,16 @@ def interpolate(self, test_data_point, ret_all=True):
 def update_GPR(self,HF_freq,HF_sample,HF_val,GPR_val,display = 0): 
     # If not all critical sample points should be added, setting Diff_tol>0 is necessary.
     Diff_tol = 0 
+#    print('len',len(HF_freq), len(HF_sample),len(HF_val),len(GPR_val))
+#    print('HF_val',HF_val)
+    GPR_val = np.array(GPR_val).flatten().tolist()
+#    print('GPR_val',GPR_val)
     
     # for each freq. point the according surrogate model might be updated
     for k in range(len(self.freqrange)):
         freqv = self.freqrange[k]
         idx_list_freqv = [i for i, value in enumerate(HF_freq) if value == freqv]
+#        print('idx_list',len(idx_list_freqv),idx_list_freqv)
         # if there is no critical sample point for a certain frequency point --> no update
         if len(idx_list_freqv) < 1:
             continue
@@ -122,6 +127,7 @@ def update_GPR(self,HF_freq,HF_sample,HF_val,GPR_val,display = 0):
             GPR_val_list_freqv = np.array(GPR_val)[idx_list_freqv]
             # calculate difference between GPR prediction and HF value
             Diff = abs(GPR_val_list_freqv - val_list_freqv)
+#            print('Diff',len(Diff),Diff)
             # one sample point (with largest error) is always added, therefor we set:
             Diff_val = Diff_tol+1
             # count, how many sample points are added to the training data set
@@ -147,7 +153,14 @@ def update_GPR(self,HF_freq,HF_sample,HF_val,GPR_val,display = 0):
                 GPR_val_list_freqv = []
                 for samplei in range(len(sample_list_freqv)):
                     GPR_range = interpolate(self,sample_list_freqv[samplei],False)
-                    GPR_val_list_freqv.append(GPR_range[k][0][0])
+                    
+                    if self.problem == 'Lowpass':
+                        GPR_range = np.array(GPR_range).flatten()
+                        #print('GPR range', GPR_range, 'GPR_val', GPR_range[k][0][0])
+                        GPR_val_list_freqv.append(GPR_range[k])
+                    elif self.problem == 'Waveguide':
+                        GPR_val_list_freqv.append(GPR_range[k][0][0])
+                    
                 
                 # ...and calculate their difference between updated GPR prediction and HF value
                 Diff = abs(GPR_val_list_freqv - val_list_freqv)
@@ -187,6 +200,7 @@ def Estimation_GPR(self, start_uq, display=1):
     i=0   # counter for considered MC sample points
     
     # Initialize data for GPR Model update in Hybrid case
+    count_update = 0 # count number of additional training data points until the next update
     self.approx_s_update = [] #GPR S-Parameter value for sample points which have been reevaluated on high fidelity (HF) model (critical samples)
     self.val_update = [] # reevaluated HF solution value of S-Parameter
     self.sample_update = [] # sample points which are reevaluated on HF model(critical samples)
@@ -259,15 +273,7 @@ def Estimation_GPR(self, start_uq, display=1):
             
             # Evaluate sample point on GPR model for all frequency points
             sigma_range, s_range = interpolate(self,sample_i,True)
-            s_dB_range = 20*np.log10(np.abs(s_range))
-
-            # Sort frequency points according to S-Parameter dB value (to start with largest value,
-                # which has the highest risk to fail pfs)
-            sort_indices = np.argsort(np.ravel(s_dB_range))[::-1]
-            s_sort = np.array(s_range)[sort_indices]
-            sigma_sort = np.array(sigma_range)[sort_indices]
-            freq_sort = np.array(self.freqrange)[sort_indices]
-            
+            s_dB_range = 20*np.log10(np.abs(s_range))        
             
             # If there is only one pfs, start with the frequency point with the highest failing risk
             if len(self.threshold) == 1:
@@ -354,6 +360,7 @@ def Estimation_GPR(self, start_uq, display=1):
                     # Evaluate critical sample point
                     fSreal, fSimag = self.model(self,[i,samples_uq[i]],dB=False)    
                     self.hf_evals=self.hf_evals+1
+                    count_update = count_update+1
                     
                     # Save data for GPR model update
                     for j2 in range(len(self.freqrange)):
@@ -379,6 +386,7 @@ def Estimation_GPR(self, start_uq, display=1):
                     val_real, val_imag = self.model(self,paraUQ(self,freq,sample_i,i))
                     val = val_real + 1j * val_imag
                     self.hf_evals=self.hf_evals+1
+                    count_update = count_update+1
                     # Save data for GPR model update
                     self.freq_update.append(freq)
                     self.sample_update.append(sample_i)
@@ -398,7 +406,8 @@ def Estimation_GPR(self, start_uq, display=1):
                 valids.append(sample_i)
         
         # If Hybrid approach, update GPR model after each 'self.Batch_Size' HF evaluations
-        if self.hf_evals % self.Batch_Size == 0 and len(self.sample_update)>0 and self.YE_method == 'Hybrid':
+        if (count_update >= self.Batch_Size or self.hf_evals % self.Batch_Size == 0) and len(self.sample_update)>0 and self.YE_method == 'Hybrid':
+        #if self.hf_evals % self.Batch_Size == 0 and len(self.sample_update)>0 and self.YE_method == 'Hybrid':
             #start = time.time()
             #print('update start')
             update_GPR(self,self.freq_update,self.sample_update,self.val_update,self.approx_s_update)
@@ -406,6 +415,7 @@ def Estimation_GPR(self, start_uq, display=1):
             #print('update stop','{:5.3f}s'.format(ende-start))
             
             # reset data for GPR model update
+            count_update = 0
             self.freq_update = []
             self.sample_update = []
             self.val_update = []
@@ -488,8 +498,8 @@ def sort_samples_EGL(self,samples_list,display=1):#, n_freq_point=0):
             Jj = []
             freqv = self.freqrange[j]
             # ...and each pfs...
-            for i in range(len(self.threshold)):
-                pfs = self.threshold[i]
+            for ii in range(len(self.threshold)):
+                pfs = self.threshold[ii]
                 if freqv >= pfs[1] and freqv <= pfs[2]:
                     bound = pfs[0]
                     Jji = np.abs(bound - sdB_range[j]) / np.abs(sigma_range[j])
@@ -497,13 +507,12 @@ def sort_samples_EGL(self,samples_list,display=1):#, n_freq_point=0):
                     Jji = np.inf
                 Jj.append(Jji)
             # ...and choose smallest value
-            J.append(np.min(Jj))
-        
+            J.append(np.min(Jj))       
         # Save sorting criteria values in a matrix
         self.SC_matrix.append(J)
         # Save lowest criterion value for each sample point (over freq. points) in a vector
         self.SC_vector.append(np.min(J))
-
+    
     # Sort sample points (and all the corresponding data), starting with the lowest value of the sorting criterion J
     SC_sorted_indices = np.argsort(np.ravel(self.SC_vector))#[::-1]
     samples_sorted = np.array(samples_list)[SC_sorted_indices]
@@ -551,8 +560,8 @@ def sort_samples_FS(self,samples_list, display=1):
             LUj = []
             freqv = self.freqrange[j]
             # ...and each pfs...
-            for i in range(len(self.threshold)):
-                pfs = self.threshold[i]
+            for ii in range(len(self.threshold)):
+                pfs = self.threshold[ii]
                 if freqv >= pfs[1] and freqv <= pfs[2]:
                     bound = pfs[0]
                     # Calculate difference between threshold (bound) and lower (L) / upper (U) bound of the safety puffer
