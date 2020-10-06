@@ -2,7 +2,7 @@
 """
 Created on Thu Sep  3 08:54:39 2020
 
-@author: Mona
+@author: Mona Fuhrländer (Technische Universität Darmstadt, mona.fuhrlaender@tu-darmstadt.de)
 
 
 Script for Evaluating Yield Estimation for simple dielectrical waveguide with 4 uncertain parameters
