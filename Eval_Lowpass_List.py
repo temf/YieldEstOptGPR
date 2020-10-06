@@ -2,7 +2,7 @@
 """
 Created on Tue Feb 18 08:59:43 2020
 
-@author: Mona
+@author: Mona Fuhrländer (Technische Universität Darmstadt, mona.fuhrlaender@tu-darmstadt.de)
 
 
 Returns QoI data for Lowpass Filter from a csv file (S-Parameter values)
