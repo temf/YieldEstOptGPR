@@ -2,7 +2,7 @@
 """
 Created on Wed Jan  9 10:17:56 2019
 
-@author: Mona
+@author: Mona Fuhrländer (Technische Universität Darmstadt, mona.fuhrlaender@tu-darmstadt.de)
 
 
 Class for Yield Estimation (and in future: Optimization)
