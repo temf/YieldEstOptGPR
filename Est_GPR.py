@@ -2,7 +2,7 @@
 """
 Created on Mon Sep 30 16:46:08 2019
 
-@author: Mona
+@author: Mona Fuhrländer (Technische Universität Darmstadt, mona.fuhrlaender@tu-darmstadt.de)
 
 Functions for Yield Estimation using Gaussian Process Regression (GPR) and/or Monte Carlo (MC)
 """
