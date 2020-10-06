@@ -2,7 +2,7 @@
 """
 Created on Mon Sep 30 12:56:13 2019
 
-@author: Mona
+@author: Mona Fuhrländer (Technische Universität Darmstadt, mona.fuhrlaender@tu-darmstadt.de)
 
 
 Util Functions for Validation of sample points
