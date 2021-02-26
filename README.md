@@ -34,6 +34,8 @@ and
 
 - For yield optimization an adaptive Newton-MC method is used, which is a modification of a globalized Newton method allowing adaptive sample size increase.
 
+- For multi-objective optimization (yield and robust geometry optimization) a genetic algorithm using pymoo.
+
 - As benchmark problems a simple dielectrical waveguide and a lowpass filter (only for estimation) are considered.
 
 ## Running the examples
@@ -41,6 +43,8 @@ and
 - The main files to run the yield estimation are Run_YieldEst_Waveguide.py (for the waveguide problem) and Run_YieldEst_Lowpass.py (for the lowpass filter problem, respectively).
 
 - The main file to run the yield optimization is Run_YieldOpt_Waveguide.py.
+
+- The main file to run the multi-objective optimization is Run_YieldMOO_Waveguide.py.
 
 ## Data origin
 
