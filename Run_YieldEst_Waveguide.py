@@ -73,7 +73,33 @@ if YE_method != 'MC':
     
 # RESULTS FOR YIELD ESTIMATION
 np.random.seed(23)
-print("Estimation: Yield =", YEO.estimate_Yield(distr_nominal, res = 'Prob'))
+print("Estimation: Yield =", YEO.estimate_Yield(distr_nominal, YEO.Nmc, res = 'Prob'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 
     

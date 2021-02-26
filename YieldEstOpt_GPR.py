@@ -11,9 +11,11 @@ Class for Yield Estimation (and in future: Optimization)
 
 from __future__ import print_function
 from Est_GPR import Estimation_GPR
+from Opt_adaptNewtonMC import Opt_Newton
 import numpy as np
 from numpy import genfromtxt
 import scipy.stats
+import copy
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
 np.seterr(divide = 'ignore') 
 
@@ -35,7 +37,7 @@ class YieldEstOpt_GPR():
         self.Safety_Factor = Safety_Factor
         self.kernel = C(1e-1, (1e-5, 1e-1)) * RBF(1.,(1e-5, 1e5))
 
-
+    
     def sample_generator(self, mean, distr, sample_size, normal = 'true'):
         # Generate sample set for the waveguide problem acc. to specific distribution
         if self.problem == 'Waveguide':
@@ -52,6 +54,7 @@ class YieldEstOpt_GPR():
                     samples_k = scipy.stats.uniform.rvs(lb,ub-lb,sample_size)
                     samples.append(samples_k)        
             samples = np.array(samples)
+            self.sample_MOO = copy.deepcopy(samples)
         
         # Call sample set for the lowpass filter problem from prepared list
         elif self.problem == 'Lowpass':
@@ -66,12 +69,18 @@ class YieldEstOpt_GPR():
 
   
 
-    def estimate_Yield(self,start_uq, display=1, res='all'):
-        Yield, valids = Estimation_GPR(self, start_uq, display)
+    def estimate_Yield(self,start_uq, Nmc_est,display=1, res='all'):
+        Yield, valids = Estimation_GPR(self, start_uq, Nmc_est, display)
         if res == 'all':
             return Yield, valids
         elif res == 'Prob':
             return Yield
+    
+    
+    
+    def optimize_Yield(self, start_uq,adaptive=True):
+        Yield_start, Yield_opt, start_uq, p_opt, opttime_end, self.ItVec_short = Opt_Newton(self,start_uq,adaptive)
+        return Yield_start, Yield_opt, start_uq, p_opt, opttime_end, self.ItVec_short
     
 
 

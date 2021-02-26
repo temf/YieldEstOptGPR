@@ -49,7 +49,7 @@ def build_sur_gpr(self, TrainSize, distr = 'gaussian'):
         self.surrogates.append(nodes)
         self.gp_imag.append(GaussianProcessRegressor(kernel=self.kernel, alpha=1e-5,normalize_y=True, n_restarts_optimizer=10)) 
         self.gp_real.append(GaussianProcessRegressor(kernel=self.kernel, alpha=1e-5,normalize_y=True, n_restarts_optimizer=10)) 
-    
+        
     # Build surrogate models
     # For the waveguide
     if self.problem == 'Waveguide':
@@ -106,16 +106,12 @@ def interpolate(self, test_data_point, ret_all=True):
 def update_GPR(self,HF_freq,HF_sample,HF_val,GPR_val,display = 0): 
     # If not all critical sample points should be added, setting Diff_tol>0 is necessary.
     Diff_tol = 0 
-#    print('len',len(HF_freq), len(HF_sample),len(HF_val),len(GPR_val))
-#    print('HF_val',HF_val)
     GPR_val = np.array(GPR_val).flatten().tolist()
-#    print('GPR_val',GPR_val)
     
     # for each freq. point the according surrogate model might be updated
     for k in range(len(self.freqrange)):
         freqv = self.freqrange[k]
         idx_list_freqv = [i for i, value in enumerate(HF_freq) if value == freqv]
-#        print('idx_list',len(idx_list_freqv),idx_list_freqv)
         # if there is no critical sample point for a certain frequency point --> no update
         if len(idx_list_freqv) < 1:
             continue
@@ -127,7 +123,7 @@ def update_GPR(self,HF_freq,HF_sample,HF_val,GPR_val,display = 0):
             GPR_val_list_freqv = np.array(GPR_val)[idx_list_freqv]
             # calculate difference between GPR prediction and HF value
             Diff = abs(GPR_val_list_freqv - val_list_freqv)
-#            print('Diff',len(Diff),Diff)
+#            print('Diff before Update',Diff)
             # one sample point (with largest error) is always added, therefor we set:
             Diff_val = Diff_tol+1
             # count, how many sample points are added to the training data set
@@ -164,6 +160,7 @@ def update_GPR(self,HF_freq,HF_sample,HF_val,GPR_val,display = 0):
                 
                 # ...and calculate their difference between updated GPR prediction and HF value
                 Diff = abs(GPR_val_list_freqv - val_list_freqv)
+#                print('Diff after Update',Diff)
                 # the sample point with the largest Diff_val value might be added in the next loop (if < Diff_tol)
                 Diff_val = np.max(Diff)
             
@@ -173,11 +170,11 @@ def update_GPR(self,HF_freq,HF_sample,HF_val,GPR_val,display = 0):
 
 
 # Estimate Yield with pure GPR, pure MC or Hybrid approach        
-def Estimation_GPR(self, start_uq, display=1):
+def Estimation_GPR(self, start_uq, Nmc_est, display=1):
     print('p:', start_uq.T,'\n')
     
     # Generate MC sample
-    samples_uq = self.sample_generator(start_uq, self.input_distr, self.Nmc).T
+    samples_uq = self.sample_generator(start_uq, self.input_distr, Nmc_est).T
     
     # Option for sorting the sample points according to EGL or FS (=Hybrid) criterion.
     if self.YE_method == 'Hybrid':
@@ -273,7 +270,7 @@ def Estimation_GPR(self, start_uq, display=1):
             
             # Evaluate sample point on GPR model for all frequency points
             sigma_range, s_range = interpolate(self,sample_i,True)
-            s_dB_range = 20*np.log10(np.abs(s_range))        
+            s_dB_range = 20*np.log10(np.abs(s_range))
             
             # If there is only one pfs, start with the frequency point with the highest failing risk
             if len(self.threshold) == 1:
@@ -406,7 +403,7 @@ def Estimation_GPR(self, start_uq, display=1):
                 valids.append(sample_i)
         
         # If Hybrid approach, update GPR model after each 'self.Batch_Size' HF evaluations
-        if (count_update >= self.Batch_Size or self.hf_evals % self.Batch_Size == 0) and len(self.sample_update)>0 and self.YE_method == 'Hybrid':
+        if (count_update >= self.Batch_Size or self.hf_evals % self.Batch_Size == 0) and len(self.sample_update)>0 and self.YE_method == 'Hybrid':  
         #if self.hf_evals % self.Batch_Size == 0 and len(self.sample_update)>0 and self.YE_method == 'Hybrid':
             #start = time.time()
             #print('update start')
@@ -420,7 +417,7 @@ def Estimation_GPR(self, start_uq, display=1):
             self.sample_update = []
             self.val_update = []
             self.approx_s_update = []
-            print('GPR models updated after', self.Nmc-len(samples_uq)+i+1, 'MC sample points and ', self.hf_evals, 'critical MC sample points.')
+            print('GPR models updated after', Nmc_est-len(samples_uq)+i+1, 'MC sample points and ', self.hf_evals, 'critical MC sample points.')
             
             # After updating the GPR model --> Evaluate all remaining sample points on GPR model and sort them according to chosen criterion
             if self.Sorting_Strategy != 'none':
@@ -453,16 +450,15 @@ def Estimation_GPR(self, start_uq, display=1):
             else:
                 # continue with the next sample point in the original list, if no sorting has taken place
                 i=i+1
-        
         else:
             # continue with next sample point from the list, if no updating has taken place
             i=i+1
         
     # Caluculate Yield and display results and effort (#HF Evaluations)    
-    Yield = float(counter_valid)/self.Nmc
+    Yield = float(counter_valid)/Nmc_est
     
     if display: 
-        print("\n Number of MC sample points: ", self.Nmc,  ", Yield is: ", Yield)
+        print("\n Number of MC sample points: ", Nmc_est,  ", Yield is: ", Yield)
         if self.YE_method != 'MC':
             print('HF evaluations for critical MC sample points:', self.hf_evals)
             print('HF evaluations to build GPR models:', self.HFevals_forGPRmodel)
