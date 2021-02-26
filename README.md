@@ -10,7 +10,8 @@ This repository contains the main source code and data of the yield estimation a
   number={1},
   pages={1--17},
   year={2020},
-  publisher={Springer}
+  publisher={Springer},
+  url={https://doi.org/10.1186/s13362-020-00093-1}
 }
 
 and
