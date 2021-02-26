@@ -1,15 +1,29 @@
 # Yield Estimation and Optimization with Gaussian Process Regression (YieldEstOptGPR)
 
-This repository contains the main source code and data of the yield estimation procedure documented in the paper "A blackbox yield estimation workflow with Gaussian process regression applied to the design of electromagnetic devices", see https://arxiv.org/abs/2003.13278, or
+This repository contains the main source code and data of the yield estimation and optimization procedures documented in the following papers 
 
 @article{FuhrlanderSchops2020,
-	author = {Fuhrländer, Mona and Schöps, Sebastian},
-	journal = {Journal of Mathematics in Industry},
-	year = {2020},
-	pubstate = {forthcoming},
-	title = {A Blackbox Yield Estimation Workflow with {Gaussian} Process Regression Applied to the Design of Electromagnetic Devices},
+  title={A blackbox yield estimation workflow with Gaussian process regression applied to the design of electromagnetic devices},
+  author={Fuhrländer, Mona and Schöps, Sebastian},
+  journal={Journal of Mathematics in Industry},
+  volume={10},
+  number={1},
+  pages={1--17},
+  year={2020},
+  publisher={Springer}
 }
 
+and
+
+@article{FuhrlanderSchops2021,
+  title={Yield Optimization using Hybrid Gaussian Process Regression and a Genetic Multi-Objective Approach},
+  author={Fuhrländer, Mona and Schöps, Sebastian},
+  journal={Advances in Radio Science},
+  publisher={Copernicus GmbH},
+  pubstate={forthcoming},
+  year={2021},
+  url={https://arxiv.org/abs/2010.04028}
+}
 
 ## Content
 
@@ -17,13 +31,15 @@ This repository contains the main source code and data of the yield estimation p
 
 - For yield estimation a hybrid method combining pure Monte Carlo (MC) with a surrogate model approach based on Gaussian process regression (GPR) is used.
 
-- As benchmark problems a simple dielectrical waveguide and a lowpass filter are considered.
+- For yield optimization an adaptive Newton-MC method is used, which is a modification of a globalized Newton method allowing adaptive sample size increase.
 
+- As benchmark problems a simple dielectrical waveguide and a lowpass filter (only for estimation) are considered.
 
 ## Running the examples
 
 - The main files to run the yield estimation are Run_YieldEst_Waveguide.py (for the waveguide problem) and Run_YieldEst_Lowpass.py (for the lowpass filter problem, respectively).
 
+- The main file to run the yield optimization is Run_YieldOpt_Waveguide.py.
 
 ## Data origin
 
