@@ -1,30 +1,31 @@
 # Yield Estimation and Optimization with Gaussian Process Regression (YieldEstOptGPR)
 
 This repository contains the main source code and data of the yield estimation and optimization procedures documented in the following papers 
-
+```
 @article{FuhrlanderSchops2020,
-  title={A blackbox yield estimation workflow with Gaussian process regression applied to the design of electromagnetic devices},
-  author={Fuhrländer, Mona and Schöps, Sebastian},
-  journal={Journal of Mathematics in Industry},
-  volume={10},
-  number={1},
-  pages={1--17},
-  year={2020},
-  publisher={Springer},
-  url={https://doi.org/10.1186/s13362-020-00093-1}
+  title     = {A blackbox yield estimation workflow with {G}aussian process regression applied to the design of electromagnetic devices},
+  author    = {Fuhrländer, Mona and Schöps, Sebastian},
+  journal   = {Journal of Mathematics in Industry},
+  volume    = {10},
+  number    = {1},
+  pages     = {1--17},
+  year      = {2020},
+  publisher = {Springer},
+  url       = {https://doi.org/10.1186/s13362-020-00093-1}
 }
-
+```
 and
-
+```
 @article{FuhrlanderSchops2021,
-  title={Yield Optimization using Hybrid Gaussian Process Regression and a Genetic Multi-Objective Approach},
-  author={Fuhrländer, Mona and Schöps, Sebastian},
-  journal={Advances in Radio Science},
-  publisher={Copernicus GmbH},
-  pubstate={forthcoming},
-  year={2021},
-  url={https://arxiv.org/abs/2010.04028}
+  title     = {Yield Optimization using Hybrid {G}aussian Process Regression and a Genetic Multi-Objective Approach},
+  author    = {Fuhrländer, Mona and Schöps, Sebastian},
+  journal   = {Advances in Radio Science},
+  publisher = {Copernicus GmbH},
+  pubstate  = {forthcoming},
+  year      = {2021},
+  url       = {https://arxiv.org/abs/2010.04028}
 }
+```
 
 ## Content
 
