@@ -20,10 +20,11 @@ and
   title     = {Yield Optimization using Hybrid {G}aussian Process Regression and a Genetic Multi-Objective Approach},
   author    = {Fuhrländer, Mona and Schöps, Sebastian},
   journal   = {Advances in Radio Science},
-  publisher = {Copernicus GmbH},
-  pubstate  = {forthcoming},
+  volume    = {19},
+  pages     = {41--48},
   year      = {2021},
-  url       = {https://arxiv.org/abs/2010.04028}
+  publisher = {Copernicus GmbH},
+  url       = {https://doi.org/10.5194/ars-19-41-2021}
 }
 ```
 
